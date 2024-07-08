@@ -101,8 +101,10 @@ const EditSleepEntryModal = ({ open, onClose, selectedSleepEntry }: Props) => {
               disableFuture
               format="DD-MM-YYYY HH:mm"
               disabled={!sleepRange[0]}
-              maxDateTime={sleepRange[0] && dayjs(sleepRange[0]).add(1, "day")}
-              minDateTime={sleepRange[0]}
+              {...(sleepRange[0]
+                ? { maxDateTime: dayjs(sleepRange[0]).add(1, "day") }
+                : {})}
+              {...(sleepRange[0] ? { minDateTime: sleepRange[0] } : {})}
               value={sleepRange[1]}
               onChange={(value, context) => {
                 setError(context.validationError);

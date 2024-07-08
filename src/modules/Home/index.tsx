@@ -14,6 +14,10 @@ import { AppContext } from "@/context/AppContext";
 import Login from "../Login";
 import SleepEntryModal from "./SleepEntryModal";
 import EditSleepEntryModal from "./EditSleepEntryModal";
+import { useMotionValue, motion, useTransform, AnimatePresence } from "framer-motion";
+import SleepDataCard from "./SleepDataCard";
+
+
 
 const HomePage = () => {
   const {
@@ -24,6 +28,7 @@ const HomePage = () => {
     loggedInUserId,
   } = useContext(AppContext) as AppContextTypes;
 
+
   const [showAddForm, setShowAddForm] = useState<boolean>(false);
   const [showEditForm, setShowEditForm] = useState<boolean>(false);
   const [selectedSleepEntry, setSelectedSleepEntry] =
@@ -32,23 +37,6 @@ const HomePage = () => {
   const handleLogOut = () => {
     setIsAuthenticated(false);
     setLoggedInUser(null);
-  };
-
-  const handleDeleteSleepEntry = (key: string) => {
-    setSleepData((curSleepData) => {
-      const newData = curSleepData[loggedInUserId].splice(
-        curSleepData[loggedInUserId].findIndex(
-          (sleepData) => sleepData.key === key
-        ),
-        1
-      );
-      return { ...curSleepData, loggedInUserId: newData };
-    });
-  };
-
-  const handleEditSleepEntry = (data: sleepDataEntryType) => {
-    setSelectedSleepEntry(data);
-    setShowEditForm(true);
   };
 
   const {
@@ -96,59 +84,55 @@ const HomePage = () => {
 
   return (
     <>
-      <Box
-        display={"flex"}
-        width={"100%"}
-        flexDirection={"column"}
-        minHeight={"80vh"}
-        p="24px"
-        gap="16px"
-        alignItems={"center"}
+      <motion.div
+        style={{
+          alignItems: "center",
+          gap: "16px",
+          padding: "24px",
+          minHeight: "100vh",
+          flexDirection: "column",
+          display: "flex",
+          width: "100%",
+        }}
       >
-        <Button sx={{maxWidth:"200px"}} onClick={handleLogOut}>Logout</Button>
-        <Box display={"flex"} flexDirection={"column"} gap="16px" alignItems={"center"} >
+        <Button sx={{ maxWidth: "200px" }} onClick={handleLogOut}>
+          Logout
+        </Button>
+        <Box
+          display={"flex"}
+          flexDirection={"column"}
+          gap="16px"
+          alignItems={"center"}
+        >
           <Button onClick={() => setShowAddForm(true)}>Add</Button>
 
-          {sleepData[loggedInUserId]?.length && (
+          {sleepData[loggedInUserId]?.length>0 && (
             <Typography color={"GrayText"}>
               Average Sleep Duration: {averageSleepDuration} hrs
             </Typography>
           )}
-          {loggedInUserId &&
-            memoisedSleepData?.map((sleepEntry, _index) => {
-              const totalSleepDurationInMinutes = dayjs(sleepEntry.wakeUp).diff(
-                dayjs(sleepEntry.sleepStart),
-                "m",
-                true
-              );
-              const totalHours = Math.floor(totalSleepDurationInMinutes / 60);
-              const totalMinutes =
-                totalSleepDurationInMinutes - totalHours * 60;
-
-              return (
-                <Box bgcolor={"white"} p="16px" key={sleepEntry?.key} border={`1px solid grey`} borderRadius={"8px"} >
-                  <Typography color={"GrayText"}>
-                    Sleep Time:{" "}
-                    {dayjs(sleepEntry.sleepStart).format("DD-MM-YYYY HH:mm")}
-                  </Typography>
-                  <Typography color={"GrayText"}>
-                    Wake-up Time:{" "}
-                    {dayjs(sleepEntry.wakeUp).format("DD-MM-YYYY HH:mm")}
-                  </Typography>
-                  <Typography color={"GrayText"}>
-                    Sleep duration: {totalHours}:{totalMinutes} hrs
-                  </Typography>
-                  <Button onClick={() => handleEditSleepEntry(sleepEntry)}>
-                    Edit
-                  </Button>
-                  <Button
-                    onClick={() => handleDeleteSleepEntry(sleepEntry.key)}
-                  >
-                    Delete
-                  </Button>
-                </Box>
-              );
-            })}
+          <AnimatePresence>
+            <motion.div
+              style={{
+                flexDirection: "column",
+                gap: "16px",
+                alignItems: "center",
+                display: "flex",
+              }}
+            >
+              {loggedInUserId &&
+                memoisedSleepData?.map((sleepEntry, _index) => {
+                  return (
+                    <SleepDataCard
+                      key={sleepEntry?.key}
+                      sleepEntry={sleepEntry}
+                      setShowEditForm={setShowEditForm}
+                      setSelectedSleepEntry={setSelectedSleepEntry}
+                    />
+                  );
+                })}
+            </motion.div>
+          </AnimatePresence>
 
           {/* <Typography color={"GrayText"}>
           Average Wake up Time: {averageWakeUpTime}
@@ -157,7 +141,7 @@ const HomePage = () => {
           Average Sleep Time: {averageSleepingTime}
         </Typography> */}
         </Box>
-      </Box>
+      </motion.div>
       {showAddForm && (
         <SleepEntryModal
           open={showAddForm}

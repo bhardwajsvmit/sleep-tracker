@@ -12,7 +12,7 @@ import {
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import React, { useContext, useState } from "react";
 
 interface Props {
@@ -25,7 +25,7 @@ const SleepEntryModal = ({ open, onClose }: Props) => {
     AppContext
   ) as AppContextTypes;
   const [error, setError] = useState<string | null>("");
-  const [sleepRange, setSleepRange] = useState([null, null]);
+  const [sleepRange, setSleepRange] = useState<(Dayjs | null)[]>([null, null]);
 
   const handleAddSleepEntry = (data: any) => {
     const sleepStart = dayjs(data[0]).format();
@@ -93,8 +93,8 @@ const SleepEntryModal = ({ open, onClose }: Props) => {
               disableFuture
               format="DD-MM-YYYY HH:mm"
               disabled={!sleepRange[0]}
-              maxDateTime={sleepRange[0] && dayjs(sleepRange[0]).add(1, "day")}
-              minDateTime={sleepRange[0]}
+              {...(sleepRange[0] ? { maxDateTime: dayjs(sleepRange[0]).add(1, "day") } : {})}
+              {...(sleepRange[0] ? { minDateTime:sleepRange[0] } : {})}
               onChange={(value, context) => {
                 setError(context.validationError);
                 setSleepRange((curRange) => [curRange[0], value]);
