@@ -116,13 +116,13 @@ const Login = () => {
   ) => {
     setErrors((err) => ({ ...err, password: "" }));
     const val = e.target.value?.trim();
-    // if (!isValidPassword(val)) {
-    //   setErrors((err) => ({
-    //     ...err,
-    //     password:
-    //       "Invalid password, Password should have at least eight characters, at least one letter and one number",
-    //   }));
-    // }
+    if (showSignUp&&!isValidPassword(val)) {
+      setErrors((err) => ({
+        ...err,
+        password:
+          "Invalid password, Password should have at least eight characters, at least one letter and one number",
+      }));
+    }
     setPassword(val);
   };
 
@@ -131,7 +131,8 @@ const Login = () => {
     !password.trim() ||
     !!errors?.email ||
     !!errors.password ||
-    !isValidEmail(email.trim());
+    !isValidEmail(email.trim()) ||
+    (showSignUp && !isValidPassword(password.trim()));
 
   return (
     <Box
